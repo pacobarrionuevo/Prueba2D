@@ -7,13 +7,23 @@ public class UIManager : MonoBehaviour
 {
     public static UIManager Instance;
 
-    [SerializeField] private TextMeshProUGUI text;
-
-    private int numeroMonedas = 0;
-
-    public void AddCoin()
+    private void Awake()
     {
-        numeroMonedas++;
-        Debug.Log(numeroMonedas);
+        if (Instance == null)
+        {
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+    }
+
+    [SerializeField] private TextMeshProUGUI coinText;
+
+    public void UpdateCoinText(int numeroMonedas) 
+    {
+        coinText.text = numeroMonedas.ToString();
     }
 }

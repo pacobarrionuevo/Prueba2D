@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 public class PlayerController : MonoBehaviour
@@ -13,12 +14,36 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private Transform groundCheck;
     [SerializeField] private LayerMask groundLayer;
 
+    /////////////////////
+
+    private bool canDash = true;
+    private bool isDashing;
+    private float dashingPower = 24f;
+    private float dashTime = 0.2f;
+    private float dashCooldown = 1f;
+
+    [SerializeField] private TrailRenderer tr;
+
+    /////////////////////
+
+
+
     // Update is called once per frame
-    void Update()
+    private void Update()
     {
+        if (isDashing) return;
+
         Move();
         Jump();
         Flip();
+        // ESTO
+        CanDash();
+
+        // O ESTO
+        if (Input.GetKeyDown(KeyCode.LeftShift) && canDash)
+        {
+            StartCoroutine(Dash());
+        }
     }
 
     private void Move()
@@ -53,10 +78,70 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    private void CanDash()
+    {
+        // Si pulsa Shift y puede dashear, empezamos la corutina
+        if (Input.GetKeyDown(KeyCode.LeftShift) && canDash)
+        {
+            StartCoroutine(Dash());
+        }
+    }
+
     private bool IsGrounded()
     {
         return Physics2D.OverlapCircle(groundCheck.position, 0.2f, groundLayer);
     }
 
-    
+    private int numeroMonedas = 0;
+
+    public static PlayerController Instance;
+
+    private void Awake()
+    {
+        if (Instance == null)
+        {
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+    }
+
+    public void AddCoin()
+    {
+        numeroMonedas++;
+        UIManager.Instance.UpdateCoinText(numeroMonedas);
+    }
+
+    ////////////////////////////
+    ///
+
+    private IEnumerator Dash()
+    {
+        // Ha pulsado Dash, es decir, ya está 'dasheando' y no puede otra vez
+        canDash = false;
+        isDashing = true;
+
+        // Guardamos la gravedad original y la setteamos a 0
+        float originalGravity = rb.gravityScale;
+        rb.gravityScale = 0f;
+
+        // Cambiamos la velocidad
+        rb.velocity = new Vector2(transform.localScale.x * dashingPower, 0f);
+
+        // Abrimos el trail y contamos la duración
+        tr.emitting = true;
+        yield return new WaitForSeconds(dashTime);
+
+        // Cuando termine, desactivamos el trail, devolvemos la gravedad original  y ya no dasheamos
+        tr.emitting = false;
+        rb.gravityScale = originalGravity;
+        isDashing = false;
+
+        // Cooldown para evitar Spam
+        yield return new WaitForSeconds(dashCooldown);
+        canDash = true;
+    }
 }

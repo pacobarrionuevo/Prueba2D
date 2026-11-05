@@ -8,7 +8,7 @@ public class MonedaManager : MonoBehaviour
     {
         if (collision.CompareTag("Player"))
         {
-            UIManager.Instance.AddCoin();
+            PlayerController.Instance.AddCoin();
             Destroy(gameObject);
         }
     }
