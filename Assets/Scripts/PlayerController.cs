@@ -1,7 +1,7 @@
 using System.Collections;
 using UnityEngine;
 
-public class PlayerController : MonoBehaviour
+public class PlayerController : Character
 {
     private float horizontal;
     private float speed = 8f;
@@ -25,7 +25,6 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private TrailRenderer tr;
 
     /////////////////////
-
 
 
     // Update is called once per frame
@@ -96,7 +95,7 @@ public class PlayerController : MonoBehaviour
 
     public static PlayerController Instance;
 
-    private void Awake()
+    private void Start()
     {
         if (Instance == null)
         {
@@ -143,5 +142,10 @@ public class PlayerController : MonoBehaviour
         // Cooldown para evitar Spam
         yield return new WaitForSeconds(dashCooldown);
         canDash = true;
+    }
+
+    protected override void Die()
+    {
+        Debug.Log("Sa matao paco");
     }
 }
